@@ -1,9 +1,8 @@
 package main
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 type album struct {
@@ -30,18 +29,58 @@ func getAlbumById(c *gin.Context) {
 	id := c.Param("id")
 
 	//Recorrer la lista de albumes
-	for _, a := range albums {
-		if(a.ID == id){
-			c.IndentedJSON(http.StatusOK, a)
+	for _, album := range albums {
+		if album.ID == id {
+			c.IndentedJSON(http.StatusOK, album)
 			return
 		}
 	}
 	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
 }
 
+// postAlbums adds an album
+func postAlbums(c *gin.Context){
+	var newAlbum album
+
+	//Llamar BindJson para mapear el JSON recibido a album
+	if err := c.BindJSON(&newAlbum); err != nil {
+		return
+	}
+
+	//Agregar el  nuevo álbum
+	albums = append(albums, newAlbum)
+	c.IndentedJSON(http.StatusCreated, newAlbum)
+}
+
+// getAlbumById get an album
+/*func getAlbumById(c *gin.Context){
+	id := c.Param("id")
+
+	for _, album := range albums {
+		if album.ID == id {
+			c.IndentedJSON(http.StatusOK, album)
+			return
+		}
+	}
+	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
+}*/
+
+// deleteAlbums delete an album
+/*func deleteAlbums(c *gin.Context){
+	oldAlbum := c.Param("id")
+
+	for _, album := range albums {
+		if album.ID == oldAlbum {
+			albums = albums
+		}
+	}
+}*/
+
 func main() {
 	router := gin.Default()
 	router.GET("/albums", getAlbums)
+	router.POST("/albums", postAlbums)
+	router.GET("/albums/:id", getAlbumById)
 
 	router.Run("localhost:8080")
 }
